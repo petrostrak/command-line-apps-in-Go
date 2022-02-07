@@ -7,6 +7,7 @@ import (
 	"os"
 )
 
+// echo "My first command line tool with Go" | ./Basic-Word-Counter
 func main() {
 	fmt.Println(count(os.Stdin))
 }
