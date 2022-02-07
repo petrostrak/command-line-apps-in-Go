@@ -50,6 +50,10 @@ func count(r io.Reader, countLines, countBytes bool) int {
 		wc++
 	}
 
+	if err := scanner.Err(); err != nil {
+		fmt.Fprintln(os.Stderr, "reading stdin:", err)
+	}
+
 	// return total
 	return wc
 }
