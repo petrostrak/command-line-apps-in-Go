@@ -9,7 +9,7 @@ import (
 	todo "github.com/petrostrak/command-line-apps-in-Go/Todo"
 )
 
-const (
+var (
 	// hardcoding the filename
 	todoFileName = ".todo.json"
 )
@@ -37,6 +37,12 @@ func main() {
 	complete := flag.Int("complete", 0, "Item to be completed")
 
 	flag.Parse()
+
+	// Check if the user defined the ENV VAR for a custom file name
+	// export TODO_FILENAME=new-todo.json
+	if os.Getenv("TODO_FILENAME") != "" {
+		todoFileName = os.Getenv("TODO_FILENAME")
+	}
 
 	// define an item list
 	l := &todo.List{}
