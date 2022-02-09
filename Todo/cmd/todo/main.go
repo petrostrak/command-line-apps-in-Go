@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	todo "github.com/petrostrak/command-line-apps-in-Go/Todo"
@@ -37,10 +38,10 @@ func main() {
 		// add to the list as an item
 	default:
 		// concatenate all arguments with a space
-		// item := strings.Join(os.Args[1:], " ")
+		task := strings.Join(os.Args[1:], " ")
 
 		// add the task
-		item := todo.Item{todoFileName, false, time.Now(), time.Time{}}
+		item := todo.Item{task, false, time.Now(), time.Time{}}
 		l.Add(item)
 
 		if err := l.Save(todoFileName); err != nil {
