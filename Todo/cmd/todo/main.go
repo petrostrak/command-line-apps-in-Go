@@ -23,6 +23,13 @@ const (
 //   -task string
 //     	Task to be included in the todo list
 func main() {
+	flag.Usage = func() {
+		fmt.Fprintf(flag.CommandLine.Output(),
+			"%s tool. Developed for the Pragmatic Bookshelf\n", os.Args[0])
+		fmt.Fprintf(flag.CommandLine.Output(), "Copyright 2022\n")
+		fmt.Fprintf(flag.CommandLine.Output(), "Usage information:")
+		flag.PrintDefaults()
+	}
 
 	// parsing command line flags
 	task := flag.String("task", "", "Task to be included in the todo list")
