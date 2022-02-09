@@ -14,6 +14,14 @@ const (
 	todoFileName = ".todo.json"
 )
 
+// > ./todo -h
+// Usage of ./todo:
+//   -complete int
+//     	Item to be completed
+//   -list
+//     	List all tasks
+//   -task string
+//     	Task to be included in the todo list
 func main() {
 
 	// parsing command line flags
