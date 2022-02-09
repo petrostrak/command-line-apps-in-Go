@@ -52,11 +52,7 @@ func main() {
 	// for an extra argument, print the list
 	case *list:
 		// list current to do items
-		for _, item := range *l {
-			if !item.Done {
-				fmt.Println(item.Task)
-			}
-		}
+		fmt.Print(l)
 	case *complete > 0:
 		// complete the given item
 		if err := l.Complete(*complete); err != nil {
