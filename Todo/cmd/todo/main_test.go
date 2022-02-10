@@ -89,4 +89,18 @@ func TestTodoCLI(t *testing.T) {
 			t.Errorf("expected %q, got %q instead", expected, out)
 		}
 	})
+
+	t.Run("DeleteTask", func(t *testing.T) {
+		cmd := exec.Command(cmdPath, "-del", "1")
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		expected := ""
+
+		if expected != string(out) {
+			t.Errorf("expected %q, got %q instead", expected, out)
+		}
+	})
 }
