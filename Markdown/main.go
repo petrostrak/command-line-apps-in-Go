@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/russross/blackfriday/v2"
@@ -53,8 +52,13 @@ func run(filename string) error {
 
 	htmlData := parseContent(input)
 
-	outName := fmt.Sprintf("%s.html", filepath.Base(filename))
-	fmt.Println(outName)
+	// create temporary file and check for errors
+	temp, err := ioutil.TempFile("", "mdp*.html")
+	if err != nil {
+		return err
+	}
+
+	outName := temp.Name()
 
 	return saveHTML(outName, htmlData)
 }
