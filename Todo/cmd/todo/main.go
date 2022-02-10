@@ -105,7 +105,7 @@ func main() {
 // getTask function decides where to get the description for a new
 // task from: arguments or STDIN
 func getTask(r io.Reader, args ...string) (string, error) {
-	if len(os.Args) > 0 {
+	if len(args) > 0 {
 		return strings.Join(args, " "), nil
 	}
 
