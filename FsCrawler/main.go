@@ -71,3 +71,10 @@ func filterOut(path, ext string, minSize int64, info os.FileInfo) bool {
 
 	return false
 }
+
+// prints out the path of the current file to the specified io.Writer
+// returning any potential error from the operation.
+func listFile(path string, out io.Writer) error {
+	_, err := fmt.Fprintln(out, path)
+	return err
+}
