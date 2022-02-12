@@ -56,3 +56,18 @@ func run(root string, out io.Writer, cfg config) error {
 		return listFile(path, out)
 	})
 }
+
+func filterOut(path, ext string, minSize int64, info os.FileInfo) bool {
+
+	// if there is a directory and is within the given size limits
+	if info.IsDir() || info.Size() < minSize {
+		return true
+	}
+
+	// if given extention is not met
+	if ext != "" && filepath.Ext(path) != ext {
+		return true
+	}
+
+	return false
+}
