@@ -16,11 +16,11 @@ func TestRun(t *testing.T) {
 		cfg      config
 		expected string
 	}{
-		{"NoFilter", "testdata", config{"", 0, true}, "testdata/dir.log\ntestdata/dir2/script.sh\n"},
-		{"FilterExtensionMatch", "testdata", config{".log", 0, true}, "testdata/dir.log\n"},
-		{"FilterExtensionSizeMatch", "testdata", config{".log", 10, true}, "testdata/dir.log\n"},
-		{"FilterExtensionSizeNoMatch", "testdata", config{".log", 20, true}, ""},
-		{"FilterExtensionNoMatch", "testdata", config{".gz", 0, true}, ""},
+		{"NoFilter", "testdata", config{"", 0, true, false}, "testdata/dir.log\ntestdata/dir2/script.sh\n"},
+		{"FilterExtensionMatch", "testdata", config{".log", 0, true, false}, "testdata/dir.log\n"},
+		{"FilterExtensionSizeMatch", "testdata", config{".log", 10, true, false}, "testdata/dir.log\n"},
+		{"FilterExtensionSizeNoMatch", "testdata", config{".log", 20, true, false}, ""},
+		{"FilterExtensionNoMatch", "testdata", config{".gz", 0, true, false}, ""},
 	}
 
 	for _, tc := range testCases {
