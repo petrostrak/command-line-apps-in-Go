@@ -10,17 +10,22 @@ import (
 )
 
 func TestRun(t *testing.T) {
+
+	var (
+		logBuffer bytes.Buffer
+	)
+
 	testCases := []struct {
 		name     string
 		root     string
 		cfg      config
 		expected string
 	}{
-		{"NoFilter", "testdata", config{"", 0, true, false}, "testdata/dir.log\ntestdata/dir2/script.sh\n"},
-		{"FilterExtensionMatch", "testdata", config{".log", 0, true, false}, "testdata/dir.log\n"},
-		{"FilterExtensionSizeMatch", "testdata", config{".log", 10, true, false}, "testdata/dir.log\n"},
-		{"FilterExtensionSizeNoMatch", "testdata", config{".log", 20, true, false}, ""},
-		{"FilterExtensionNoMatch", "testdata", config{".gz", 0, true, false}, ""},
+		{"NoFilter", "testdata", config{"", 0, true, false, &logBuffer}, "testdata/dir.log\ntestdata/dir2/script.sh\n"},
+		{"FilterExtensionMatch", "testdata", config{".log", 0, true, false, &logBuffer}, "testdata/dir.log\n"},
+		{"FilterExtensionSizeMatch", "testdata", config{".log", 10, true, false, &logBuffer}, "testdata/dir.log\n"},
+		{"FilterExtensionSizeNoMatch", "testdata", config{".log", 20, true, false, &logBuffer}, ""},
+		{"FilterExtensionNoMatch", "testdata", config{".gz", 0, true, false, &logBuffer}, ""},
 	}
 
 	for _, tc := range testCases {
@@ -62,6 +67,12 @@ func createTempDir(t *testing.T, files map[string]int) (dirname string, cleanup 
 }
 
 func TestRunDelExtension(t *testing.T) {
+
+	var (
+		buffer    bytes.Buffer
+		logBuffer bytes.Buffer
+	)
+
 	testCases := []struct {
 		name        string
 		cfg         config
@@ -70,14 +81,13 @@ func TestRunDelExtension(t *testing.T) {
 		nNoDelete   int
 		expected    string
 	}{
-		{"DeleteExtensionNoMatch", config{".log", 0, false, true}, ".gz", 0, 10, ""},
-		{"DeleteExtensionMatch", config{".log", 0, false, true}, ".gz", 10, 0, ""},
-		{"DeleteExtensionMixed", config{".log", 0, false, true}, ".gz", 5, 5, ""},
+		{"DeleteExtensionNoMatch", config{".log", 0, false, true, &logBuffer}, ".gz", 0, 10, ""},
+		{"DeleteExtensionMatch", config{".log", 0, false, true, &logBuffer}, ".gz", 10, 0, ""},
+		{"DeleteExtensionMixed", config{".log", 0, false, true, &logBuffer}, ".gz", 5, 5, ""},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			var buffer bytes.Buffer
 
 			tempDir, cleanup := createTempDir(t, map[string]int{
 				tc.cfg.ext:     tc.nDelete,
@@ -102,6 +112,13 @@ func TestRunDelExtension(t *testing.T) {
 
 			if len(filesLeft) != tc.nNoDelete {
 				t.Errorf("expected %d files left, got %d instead\n", tc.nNoDelete, len(filesLeft))
+			}
+
+			expLogLines := tc.nDelete + 1
+			lines := bytes.Split(logBuffer.Bytes(), []byte("\n"))
+			if len(lines) != expLogLines {
+				t.Errorf("Expected %d log lines, got %d instead\n",
+					expLogLines, len(lines))
 			}
 		})
 	}
