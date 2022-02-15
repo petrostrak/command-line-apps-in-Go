@@ -10,11 +10,12 @@ import (
 )
 
 type config struct {
-	ext  string    // extention to filter out
-	size int64     // minimum file size
-	list bool      // list files
-	del  bool      // delete files
-	wLog io.Writer // log destination writer
+	ext     string    // extention to filter out
+	size    int64     // minimum file size
+	list    bool      // list files
+	del     bool      // delete files
+	wLog    io.Writer // log destination writer
+	archive string    // archive directory
 }
 
 var (
@@ -28,6 +29,7 @@ func main() {
 	logFile := flag.String("log", "", "Log deletes to the file")
 	// action options
 	list := flag.Bool("list", false, "List files only")
+	archive := flag.String("archive", "", "Archive directory")
 	del := flag.Bool("del", false, "Delete files")
 	// filter option
 	ext := flag.String("ext", "", "File extention to filter out")
@@ -50,6 +52,7 @@ func main() {
 		*list,
 		*del,
 		f,
+		*archive,
 	}
 
 	if err := run(*root, os.Stdout, c); err != nil {
@@ -73,6 +76,13 @@ func run(root string, out io.Writer, cfg config) error {
 		// if list was explicitly set, don't do anything else
 		if cfg.list {
 			return listFile(path, out)
+		}
+
+		// archive files and continue if successful
+		if cfg.archive != "" {
+			if err := archiveFile(cfg.archive, root, path); err != nil {
+				return err
+			}
 		}
 
 		// delete files
