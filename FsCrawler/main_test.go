@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -21,11 +22,11 @@ func TestRun(t *testing.T) {
 		cfg      config
 		expected string
 	}{
-		{"NoFilter", "testdata", config{"", 0, true, false, &logBuffer}, "testdata/dir.log\ntestdata/dir2/script.sh\n"},
-		{"FilterExtensionMatch", "testdata", config{".log", 0, true, false, &logBuffer}, "testdata/dir.log\n"},
-		{"FilterExtensionSizeMatch", "testdata", config{".log", 10, true, false, &logBuffer}, "testdata/dir.log\n"},
-		{"FilterExtensionSizeNoMatch", "testdata", config{".log", 20, true, false, &logBuffer}, ""},
-		{"FilterExtensionNoMatch", "testdata", config{".gz", 0, true, false, &logBuffer}, ""},
+		{"NoFilter", "testdata", config{"", 0, true, false, &logBuffer, ""}, "testdata/dir.log\ntestdata/dir2/script.sh\n"},
+		{"FilterExtensionMatch", "testdata", config{".log", 0, true, false, &logBuffer, ""}, "testdata/dir.log\n"},
+		{"FilterExtensionSizeMatch", "testdata", config{".log", 10, true, false, &logBuffer, ""}, "testdata/dir.log\n"},
+		{"FilterExtensionSizeNoMatch", "testdata", config{".log", 20, true, false, &logBuffer, ""}, ""},
+		{"FilterExtensionNoMatch", "testdata", config{".gz", 0, true, false, &logBuffer, ""}, ""},
 	}
 
 	for _, tc := range testCases {
@@ -81,9 +82,9 @@ func TestRunDelExtension(t *testing.T) {
 		nNoDelete   int
 		expected    string
 	}{
-		{"DeleteExtensionNoMatch", config{".log", 0, false, true, &logBuffer}, ".gz", 0, 10, ""},
-		{"DeleteExtensionMatch", config{".log", 0, false, true, &logBuffer}, ".gz", 10, 0, ""},
-		{"DeleteExtensionMixed", config{".log", 0, false, true, &logBuffer}, ".gz", 5, 5, ""},
+		{"DeleteExtensionNoMatch", config{".log", 0, false, true, &logBuffer, ""}, ".gz", 0, 10, ""},
+		{"DeleteExtensionMatch", config{".log", 0, false, true, &logBuffer, ""}, ".gz", 10, 0, ""},
+		{"DeleteExtensionMixed", config{".log", 0, false, true, &logBuffer, ""}, ".gz", 5, 5, ""},
 	}
 
 	for _, tc := range testCases {
@@ -119,6 +120,71 @@ func TestRunDelExtension(t *testing.T) {
 			if len(lines) != expLogLines {
 				t.Errorf("Expected %d log lines, got %d instead\n",
 					expLogLines, len(lines))
+			}
+		})
+	}
+}
+
+func TestRunArchive(t *testing.T) {
+
+	var (
+		logBuffer bytes.Buffer
+	)
+
+	testCases := []struct {
+		name         string
+		cfg          config
+		extNoArchive string
+		nArchive     int
+		nNoArchive   int
+	}{
+		{"ArchiveExtentionNoMatch", config{".log", 0, true, false, &logBuffer, ""}, ".gz", 0, 10},
+		{"ArchiveExtentionMatch", config{".log", 0, true, false, &logBuffer, ""}, "", 10, 0},
+		{"ArchiveExtentionMixed", config{".log", 0, true, false, &logBuffer, ""}, ".gz", 5, 5},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			// Buffer for RunArchive output
+			var buffer bytes.Buffer
+
+			// Create temp dirs for RunArchive test
+			tempDir, cleanup := createTempDir(t, map[string]int{
+				tc.cfg.ext:      tc.nArchive,
+				tc.extNoArchive: tc.nNoArchive,
+			})
+			defer cleanup()
+
+			archiveDir, cleanupArchive := createTempDir(t, nil)
+			defer cleanupArchive()
+
+			tc.cfg.archive = archiveDir
+
+			if err := run(tempDir, &buffer, tc.cfg); err != nil {
+				t.Fatal(err)
+			}
+
+			pattern := filepath.Join(tempDir, fmt.Sprintf("*%s", tc.cfg.ext))
+			expFiles, err := filepath.Glob(pattern)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			expOut := strings.Join(expFiles, "\n")
+			res := strings.TrimSpace(buffer.String())
+
+			if expOut != res {
+				t.Errorf("Expected %q, got %q instead\n", expOut, res)
+			}
+
+			filesArchived, err := ioutil.ReadDir(archiveDir)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if len(filesArchived) != tc.nArchive {
+				t.Errorf("Expected %d files archived, got %d instead\n",
+					tc.nArchive, len(filesArchived))
 			}
 		})
 	}
