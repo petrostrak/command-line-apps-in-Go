@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sync"
 )
 
 // cat << 'EOF' > testdata/example.csv
@@ -52,31 +53,60 @@ func run(filenames []string, op string, column int, out io.Writer) error {
 	}
 
 	consolidate := make([]float64, 0)
+	// create the channel to receive results or errors of operations
+	resCh := make(chan []float64)
+	errCh := make(chan error)
+
+	// Notice that you’re using an empty struct as the type for the doneCh channel.
+	// This is a common pattern since this channel doesn’t need to send any data. It
+	// only sends a signal indicating the processing is done. By using the empty
+	// struct , the program doesn’t allocate any memory for this channel.
+	doneCh := make(chan struct{})
+
+	wg := sync.WaitGroup{}
 
 	// loop through all files adding their data to consolidate
 	for _, fname := range filenames {
+		wg.Add(1)
 
-		// open the file for reading
-		f, err := os.Open(fname)
-		if err != nil {
-			return fmt.Errorf("cannot open file: %w", err)
-		}
+		go func(fname string) {
+			defer wg.Done()
 
-		// parse the CSV into a slice of float64 numbers
-		data, err := csvToFloat(f, column)
-		if err != nil {
-			return err
-		}
+			// open the file for reading
+			f, err := os.Open(fname)
+			if err != nil {
+				errCh <- fmt.Errorf("cannot open file: %w", err)
+			}
 
-		if err := f.Close(); err != nil {
-			return err
-		}
+			// parse the CSV into a slice of float64 numbers
+			data, err := csvToFloat(f, column)
+			if err != nil {
+				errCh <- err
+			}
 
-		// append the data to consolidate
-		consolidate = append(consolidate, data...)
+			if err := f.Close(); err != nil {
+				errCh <- err
+			}
+
+			resCh <- data
+
+		}(fname)
 	}
 
-	_, err := fmt.Fprintln(out, opFunc(consolidate))
+	go func() {
+		wg.Wait()
+		close(doneCh)
+	}()
 
-	return err
+	for {
+		select {
+		case err := <-errCh:
+			return err
+		case data := <-resCh:
+			consolidate = append(consolidate, data...)
+		case <-doneCh:
+			_, err := fmt.Fprintln(out, opFunc(consolidate))
+			return err
+		}
+	}
 }
