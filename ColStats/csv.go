@@ -33,20 +33,24 @@ func csvToFloat(r io.Reader, column int) ([]float64, error) {
 
 	// create the csv Reader used to read in data from CSV files
 	cr := csv.NewReader(r)
+	cr.ReuseRecord = true
 
 	// adjusting for 0 based index
 	column--
 
-	// read in all csv data
-	allData, err := cr.ReadAll()
-	if err != nil {
-		return nil, fmt.Errorf("cannot read data from file: %w", err)
-	}
-
 	var data []float64
 
 	// looping through all records
-	for i, row := range allData {
+	for i := 0; ; i++ {
+		row, err := cr.Read()
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			return nil, fmt.Errorf("cannot read data from file: %w", err)
+		}
+
 		if i == 0 {
 			continue
 		}
