@@ -7,6 +7,7 @@ import (
 	"os"
 )
 
+// cat << 'EOF' > testdata/example.csv
 func main() {
 	// verify and parse arguments
 	op := flag.String("op", "sum", "Operation to be executed")
