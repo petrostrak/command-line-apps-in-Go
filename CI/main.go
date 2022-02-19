@@ -22,7 +22,7 @@ func run(proj string, out io.Writer) error {
 
 	// check if the project dir is provided
 	if proj == "" {
-		return fmt.Errorf("project dir is required")
+		return fmt.Errorf("project dir is required: %w", ErrValidation)
 	}
 
 	args := []string{"build", ".", "errors"}
