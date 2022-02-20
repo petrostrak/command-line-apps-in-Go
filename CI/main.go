@@ -7,6 +7,7 @@ import (
 	"os"
 )
 
+// ./CI -p testdata/tool
 func main() {
 	proj := flag.String("p", "", "Project directory")
 	flag.Parse()
