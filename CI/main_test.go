@@ -12,27 +12,41 @@ import (
 )
 
 func TestRun(t *testing.T) {
+	_, err := exec.LookPath("git")
+	if err != nil {
+		t.Skip("Git not installed. Skipping test.")
+	}
+
 	var testCases = []struct {
-		name   string
-		proj   string
-		out    string
-		expErr error
+		name     string
+		proj     string
+		out      string
+		expErr   error
+		setupGit bool
 	}{
 		{name: "success", proj: "./testdata/tool/",
-			out:    "Go Build: SUCCESS\nGo TEST: SUCCESS\nGofmt: SUCCESS\nGit Push: SUCCESS\n",
-			expErr: nil,
+			out:      "Go Build: SUCCESS\nGo TEST: SUCCESS\nGofmt: SUCCESS\nGit Push: SUCCESS\n",
+			expErr:   nil,
+			setupGit: true,
 		},
 		{name: "fail", proj: "./testdata/toolErr",
-			out:    "",
-			expErr: &stepErr{step: "go build"},
+			out:      "",
+			expErr:   &stepErr{step: "go build"},
+			setupGit: false,
 		},
 		{name: "failFormat", proj: "./testdata/toolFmtErr",
-			out:    "",
-			expErr: &stepErr{step: "go fmt"}},
+			out:      "",
+			expErr:   &stepErr{step: "go fmt"},
+			setupGit: false,
+		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			if tc.setupGit {
+				cleanup := setupGit(t, tc.proj)
+				defer cleanup()
+			}
 			var out bytes.Buffer
 			err := run(tc.proj, &out)
 			if tc.expErr != nil {
