@@ -142,3 +142,10 @@ func mochCmdContext(ctx context.Context, exe string, args ...string) *exec.Cmd {
 
 	return cmd
 }
+
+func mockCmdTimeout(ctx context.Context, exe string, args ...string) *exec.Cmd {
+	cmd := mochCmdContext(ctx, exe, args...)
+	cmd.Env = append(cmd.Env, "GO_HELPER_TIMEOUT=1")
+
+	return cmd
+}
