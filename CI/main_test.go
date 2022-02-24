@@ -14,10 +14,10 @@ import (
 )
 
 func TestRun(t *testing.T) {
-	_, err := exec.LookPath("git")
-	if err != nil {
-		t.Skip("Git not installed. Skipping test.")
-	}
+	// _, err := exec.LookPath("git")
+	// if err != nil {
+	// 	t.Skip("Git not installed. Skipping test.")
+	// }
 
 	var testCases = []struct {
 		name     string
@@ -25,6 +25,7 @@ func TestRun(t *testing.T) {
 		out      string
 		expErr   error
 		setupGit bool
+		mockCmd  func(ctx context.Context, name string, arg ...string) *exec.Cmd
 	}{
 		{name: "success", proj: "./testdata/tool/",
 			out: "Go Build: SUCCESS\n" +
@@ -32,22 +33,47 @@ func TestRun(t *testing.T) {
 				"Gofmt: SUCCESS\n" +
 				"Git Push: SUCCESS\n",
 			expErr:   nil,
-			setupGit: true},
+			setupGit: true,
+			mockCmd:  nil},
+		{name: "successMock", proj: "./testdata/tool/",
+			out: "Go Build: SUCCESS\n" +
+				"Go Test: SUCCESS\n" +
+				"Gofmt: SUCCESS\n" +
+				"Git Push: SUCCESS\n",
+			expErr:   nil,
+			setupGit: false,
+			mockCmd:  mockCmdContext},
 		{name: "fail", proj: "./testdata/toolErr",
 			out:      "",
 			expErr:   &stepErr{step: "go build"},
-			setupGit: false},
+			setupGit: false,
+			mockCmd:  nil},
 		{name: "failFormat", proj: "./testdata/toolFmtErr",
 			out:      "",
 			expErr:   &stepErr{step: "go fmt"},
-			setupGit: false},
+			setupGit: false,
+			mockCmd:  nil},
+		{name: "failTimeout", proj: "./testdata/tool",
+			out:      "",
+			expErr:   context.DeadlineExceeded,
+			setupGit: false,
+			mockCmd:  mockCmdTimeout},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			if tc.setupGit {
+				_, err := exec.LookPath("git")
+				if err != nil {
+					t.Skip("Git not installed. Skipping test.")
+				}
+
 				cleanup := setupGit(t, tc.proj)
 				defer cleanup()
+			}
+
+			if tc.mockCmd != nil {
+				command = tc.mockCmd
 			}
 
 			var out bytes.Buffer
@@ -133,7 +159,7 @@ func setupGit(t *testing.T, proj string) func() {
 	}
 }
 
-func mochCmdContext(ctx context.Context, exe string, args ...string) *exec.Cmd {
+func mockCmdContext(ctx context.Context, exe string, args ...string) *exec.Cmd {
 	cs := []string{"-test.run=TestHelperProcess"}
 	cs = append(cs, exe)
 	cs = append(cs, args...)
@@ -145,7 +171,7 @@ func mochCmdContext(ctx context.Context, exe string, args ...string) *exec.Cmd {
 }
 
 func mockCmdTimeout(ctx context.Context, exe string, args ...string) *exec.Cmd {
-	cmd := mochCmdContext(ctx, exe, args...)
+	cmd := mockCmdContext(ctx, exe, args...)
 	cmd.Env = append(cmd.Env, "GO_HELPER_TIMEOUT=1")
 
 	return cmd
