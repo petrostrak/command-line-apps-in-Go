@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"testing"
+	"time"
 )
 
 func TestRun(t *testing.T) {
@@ -148,4 +149,21 @@ func mockCmdTimeout(ctx context.Context, exe string, args ...string) *exec.Cmd {
 	cmd.Env = append(cmd.Env, "GO_HELPER_TIMEOUT=1")
 
 	return cmd
+}
+
+func TestHelperProcess(t *testing.T) {
+	if os.Getenv("GO_WANT_HELPER_PROCESS") != "1" {
+		return
+	}
+
+	if os.Getenv("GO_HELPER_TIMEOUT") == "1" {
+		time.Sleep(15 * time.Second)
+	}
+
+	if os.Args[2] == "git" {
+		fmt.Fprintln(os.Stdout, "Everything up-to-date")
+		os.Exit(0)
+	}
+
+	os.Exit(1)
 }
