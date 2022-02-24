@@ -25,20 +25,20 @@ func TestRun(t *testing.T) {
 		setupGit bool
 	}{
 		{name: "success", proj: "./testdata/tool/",
-			out:      "Go Build: SUCCESS\nGo TEST: SUCCESS\nGofmt: SUCCESS\nGit Push: SUCCESS\n",
+			out: "Go Build: SUCCESS\n" +
+				"Go Test: SUCCESS\n" +
+				"Gofmt: SUCCESS\n" +
+				"Git Push: SUCCESS\n",
 			expErr:   nil,
-			setupGit: true,
-		},
+			setupGit: true},
 		{name: "fail", proj: "./testdata/toolErr",
 			out:      "",
 			expErr:   &stepErr{step: "go build"},
-			setupGit: false,
-		},
+			setupGit: false},
 		{name: "failFormat", proj: "./testdata/toolFmtErr",
 			out:      "",
 			expErr:   &stepErr{step: "go fmt"},
-			setupGit: false,
-		},
+			setupGit: false},
 	}
 
 	for _, tc := range testCases {
@@ -47,23 +47,24 @@ func TestRun(t *testing.T) {
 				cleanup := setupGit(t, tc.proj)
 				defer cleanup()
 			}
+
 			var out bytes.Buffer
 			err := run(tc.proj, &out)
+
 			if tc.expErr != nil {
 				if err == nil {
-					t.Errorf("expected error: %q. Got 'nil' instead.", tc.expErr)
+					t.Errorf("Expected error: %q. Got 'nil' instead.", tc.expErr)
 					return
 				}
 
 				if !errors.Is(err, tc.expErr) {
 					t.Errorf("Expected error: %q. Got %q.", tc.expErr, err)
 				}
-
 				return
 			}
 
 			if err != nil {
-				t.Errorf("unexpected error: %q", err)
+				t.Errorf("Unexpected error: %q", err)
 			}
 
 			if out.String() != tc.out {

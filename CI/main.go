@@ -24,13 +24,11 @@ func main() {
 }
 
 func run(proj string, out io.Writer) error {
-
-	// check if the project dir is provided
 	if proj == "" {
-		return fmt.Errorf("project dir is required: %w", ErrValidation)
+		return fmt.Errorf("Project directory is required: %w", ErrValidation)
 	}
 
-	pipeline := make([]executer, 3)
+	pipeline := make([]executer, 4)
 	pipeline[0] = newStep(
 		"go build",
 		"go",
@@ -42,7 +40,7 @@ func run(proj string, out io.Writer) error {
 	pipeline[1] = newStep(
 		"go test",
 		"go",
-		"Go TEST: SUCCESS",
+		"Go Test: SUCCESS",
 		proj,
 		[]string{"test", "-v"},
 	)
