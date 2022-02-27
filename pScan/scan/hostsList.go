@@ -3,8 +3,10 @@
 package scan
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
+	"os"
 	"sort"
 )
 
@@ -57,4 +59,25 @@ func (hl *HostsList) Remove(host string) error {
 	}
 
 	return fmt.Errorf("%w: %s", ErrNotExists, host)
+}
+
+// Load obtains hosts from a hosts file
+func (hl *HostsList) Load(hostFile string) error {
+	f, err := os.Open(hostFile)
+	if err != nil {
+		if errors.Is(err, ErrNotExists) {
+			return nil
+		}
+
+		return err
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+
+	for scanner.Scan() {
+		hl.Hosts = append(hl.Hosts, scanner.Text())
+	}
+
+	return nil
 }
