@@ -18,6 +18,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+
 	"github.com/spf13/cobra"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -29,7 +30,7 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "pScan",
-	Short: "A brief description of your application",
+	Short: "Fast TCP port scanner",
 	Long: `A longer description that spans multiple lines and likely contains
 examples and usage of using your application. For example:
 
@@ -39,6 +40,7 @@ to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
+	Version: "0.1",
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -59,6 +61,10 @@ func init() {
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
+	versionTemplate := `{{printf "%s: %s - version %s\n" .Name .Short
+	.Version}}`
+	rootCmd.SetVersionTemplate(versionTemplate)
 }
 
 // initConfig reads in config file and ENV variables if set.
