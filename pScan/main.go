@@ -14,6 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 cobra init --pkg-name github.com/petrostrak/command-line-apps-in-Go/pScan
+
+To export path
+export PATH=$(go env GOPATH)/bin:$PATH
 */
 package main
 
