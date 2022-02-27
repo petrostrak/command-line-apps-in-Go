@@ -4,6 +4,7 @@ package scan
 
 import (
 	"errors"
+	"fmt"
 	"sort"
 )
 
@@ -30,4 +31,14 @@ func (hl *HostsList) search(host string) (bool, int) {
 	}
 
 	return false, -1
+}
+
+// Add adds a host to the list
+func (hl *HostsList) Add(host string) error {
+	if found, _ := hl.search(host); found {
+		return fmt.Errorf("%w: %s", ErrExists, host)
+	}
+
+	hl.Hosts = append(hl.Hosts, host)
+	return nil
 }
