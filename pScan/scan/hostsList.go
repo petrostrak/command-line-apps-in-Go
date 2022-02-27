@@ -6,6 +6,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"sort"
 )
@@ -80,4 +81,15 @@ func (hl *HostsList) Load(hostFile string) error {
 	}
 
 	return nil
+}
+
+// Save saves hosts to a hosts file
+func (hl *HostsList) Save(hostsFile string) error {
+	output := ""
+
+	for _, h := range hl.Hosts {
+		output += fmt.Sprintln(h)
+	}
+
+	return ioutil.WriteFile(hostsFile, []byte(output), 0644)
 }
