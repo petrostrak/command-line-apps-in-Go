@@ -42,3 +42,13 @@ func (hl *HostsList) Add(host string) error {
 	hl.Hosts = append(hl.Hosts, host)
 	return nil
 }
+
+// Remove deletes a host from the list
+func (hl *HostsList) Remove(host string) error {
+	if found, i := hl.search(host); found {
+		hl.Hosts = append(hl.Hosts[:i], hl.Hosts[i+1:]...)
+		return nil
+	}
+
+	return fmt.Errorf("%w: %s", ErrNotExists, host)
+}
