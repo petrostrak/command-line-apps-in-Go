@@ -82,3 +82,20 @@ func TestSaveLoad(t *testing.T) {
 		t.Errorf("Host %q should match %q host.", hl1.Hosts[0], hl2.Hosts[0])
 	}
 }
+
+func TestLoadNoFile(t *testing.T) {
+	tf, err := ioutil.TempFile("", "")
+	if err != nil {
+		t.Fatalf("error creating temp file: %s", err)
+	}
+
+	if err := os.Remove(tf.Name()); err != nil {
+		t.Fatalf("error deleting temp file: %s", err)
+	}
+
+	hl := &HostsList{}
+
+	if err := hl.Load(tf.Name()); err != nil {
+		t.Errorf("expected no error, got %q instead\n", err)
+	}
+}
