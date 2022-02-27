@@ -46,6 +46,12 @@ func (hl *HostsList) Add(host string) error {
 // Remove deletes a host from the list
 func (hl *HostsList) Remove(host string) error {
 	if found, i := hl.search(host); found {
+
+		// Theory
+		//
+		// [i:j] ([i:] including i), ([:j] j excluding)
+		// append to the list up to i (i excluding) the rest of
+		// the list (i+1 including)
 		hl.Hosts = append(hl.Hosts[:i], hl.Hosts[i+1:]...)
 		return nil
 	}
