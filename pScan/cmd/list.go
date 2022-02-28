@@ -17,8 +17,10 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"os"
 
+	"github.com/petrostrak/command-line-apps-in-Go/pScan/scan"
 	"github.com/spf13/cobra"
 )
 
@@ -52,4 +54,23 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// listCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+}
+
+// listAction creates an instance of the HostsList type. Then, it loads the content of the hostsFile
+// into the hosts list instance and iterates over each entry, printing each item into the io.Writer
+// interface as a new line.
+func listAction(out io.Writer, hostsFile string, args []string) error {
+	hl := &scan.HostsList{}
+
+	if err := hl.Load(hostsFile); err != nil {
+		return err
+	}
+
+	for _, h := range hl.Hosts {
+		if _, err := fmt.Fprintln(out, h); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
