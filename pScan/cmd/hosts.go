@@ -22,7 +22,7 @@ import (
 // hostsCmd represents the hosts command
 var hostsCmd = &cobra.Command{
 	Use:   "hosts",
-	Short: "Manage the hosts command",
+	Short: "Manage the hosts list",
 	Long: `Manages the hosts lists for pSan
 	
 Add hosts with the add command
