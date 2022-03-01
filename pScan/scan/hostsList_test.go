@@ -99,3 +99,54 @@ func TestLoadNoFile(t *testing.T) {
 		t.Errorf("expected no error, got %q instead\n", err)
 	}
 }
+
+func TestRemove(t *testing.T) {
+	testCases := []struct {
+		name      string
+		host      string
+		expectLen int
+		expectErr error
+	}{
+		{"RemoveExisting", "host1", 1, nil},
+		{"RemoveNotFound", "host3", 1, ErrNotExists},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			hl := &HostsList{}
+
+			for _, h := range []string{"host1", "host2"} {
+				if err := hl.Add(h); err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			err := hl.Remove(tc.host)
+
+			if tc.expectErr != nil {
+				if err == nil {
+					t.Fatal("expected error, got nil instead\n")
+				}
+
+				if !errors.Is(err, tc.expectErr) {
+					t.Errorf("expeced error %q, got %q instead\n", tc.expectErr, err)
+				}
+
+				return
+			}
+
+			if err != nil {
+				t.Fatalf("expected no error, got %q instead\n", err)
+			}
+
+			if len(hl.Hosts) != tc.expectLen {
+				t.Errorf("Expected list length %d, got %d instead\n",
+					tc.expectLen, len(hl.Hosts))
+			}
+
+			if hl.Hosts[0] == tc.host {
+				t.Errorf("Host name %q should not be in the list\n", tc.host)
+			}
+		})
+	}
+}
