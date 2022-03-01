@@ -2,9 +2,11 @@ package cmd
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/petrostrak/command-line-apps-in-Go/pScan/scan"
@@ -94,5 +96,65 @@ func TestHostActions(t *testing.T) {
 				t.Errorf("expected output %q, got %q\n", tc.expectedOut, out.String())
 			}
 		})
+	}
+}
+
+func TestIntegration(t *testing.T) {
+	// define hosts for integration test
+	hosts := []string{
+		"host1",
+		"host2",
+		"host3",
+	}
+
+	// setup integration test
+	tf, cleanup := setup(t, hosts, false)
+	defer cleanup()
+
+	delHost := "host2"
+
+	hostsEnd := []string{
+		"host1",
+		"host3",
+	}
+
+	// define var to capture output
+	var out bytes.Buffer
+
+	expectedOut := ""
+
+	for _, v := range hosts {
+		expectedOut += fmt.Sprintf("Added host: %s\n", v)
+	}
+
+	expectedOut += strings.Join(hosts, "\n")
+	expectedOut += fmt.Sprintln()
+	expectedOut += fmt.Sprintf("Deleted host: %s\n", delHost)
+	expectedOut += strings.Join(hostsEnd, "\n")
+	expectedOut += fmt.Sprintln()
+
+	// add hosts to the list
+	if err := addAction(&out, tf, hosts); err != nil {
+		t.Fatalf("expected no error, got %q\n", err)
+	}
+
+	// list hosts
+	if err := listAction(&out, tf, nil); err != nil {
+		t.Fatalf("Expected no error, got %q\n", err)
+	}
+
+	// delete host2
+	if err := deleteAction(&out, tf, []string{delHost}); err != nil {
+		t.Fatalf("Expected no error, got %q\n", err)
+	}
+
+	// list hosts after delete
+	if err := listAction(&out, tf, nil); err != nil {
+		t.Fatalf("Expected no error, got %q\n", err)
+	}
+
+	// test integration output
+	if out.String() != expectedOut {
+		t.Errorf("expected output %q, got %q\n", expectedOut, out.String())
 	}
 }
