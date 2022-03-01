@@ -55,3 +55,28 @@ func scanPort(host string, port int) PortState {
 	p.Open = true
 	return p
 }
+
+// Run performs a port scan on the hosts list
+func Run(hl *HostsList, ports []int) []Results {
+	res := make([]Results, 0, len(hl.Hosts))
+
+	for _, h := range hl.Hosts {
+		r := Results{
+			Host: h,
+		}
+
+		if _, err := net.LookupHost(h); err != nil {
+			r.NotFound = true
+			res = append(res, r)
+			continue
+		}
+
+		for _, p := range ports {
+			r.PortStates = append(r.PortStates, scanPort(h, p))
+		}
+
+		res = append(res, r)
+	}
+
+	return res
+}
