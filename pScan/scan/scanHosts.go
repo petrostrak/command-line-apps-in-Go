@@ -18,6 +18,13 @@ type PortState struct {
 // port is open or closed.
 type state bool
 
+// Results represents the scan results for a single host
+type Results struct {
+	Host       string
+	NotFound   bool
+	PortStates []PortState
+}
+
 // String converts the boolean value of state to a human readable string
 func (s state) String() string {
 	if s {
