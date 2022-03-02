@@ -16,10 +16,13 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/cobra/doc"
 )
 
 // docsCmd represents the docs command
@@ -38,7 +41,7 @@ var docsCmd = &cobra.Command{
 			}
 		}
 
-		return docsAction(os.Stdout)
+		return docsAction(os.Stdout, dir)
 	},
 }
 
@@ -55,4 +58,13 @@ func init() {
 	// is called directly, e.g.:
 	// docsCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	docsCmd.Flags().StringP("dir", "d", "", "Destination directory for docs")
+}
+
+func docsAction(out io.Writer, dir string) error {
+	if err := doc.GenMarkdownTree(rootCmd, dir); err != nil {
+		return err
+	}
+
+	_, err := fmt.Fprintf(out, "Documentation successfully created in %s\n", dir)
+	return err
 }
