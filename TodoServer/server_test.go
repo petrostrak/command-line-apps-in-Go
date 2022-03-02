@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -297,4 +298,9 @@ func TestComplete(t *testing.T) {
 			t.Error("Expected Item 2 not to be completed")
 		}
 	})
+}
+
+func TestMain(m *testing.M) {
+	log.SetOutput(ioutil.Discard)
+	os.Exit(m.Run())
 }
