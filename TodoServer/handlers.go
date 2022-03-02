@@ -88,3 +88,11 @@ func getAllHandler(w http.ResponseWriter, r *http.Request, list *todo.List) {
 
 	replyJSONContent(w, r, http.StatusOK, resp)
 }
+
+func getOneHandler(w http.ResponseWriter, r *http.Request, list *todo.List, id int) {
+	resp := &todoResponse{
+		Results: (*list)[id-1 : id],
+	}
+
+	replyJSONContent(w, r, http.StatusOK, resp)
+}
