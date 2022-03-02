@@ -16,8 +16,10 @@ limitations under the License.
 package cmd
 
 import (
+	"io"
 	"os"
 
+	"github.com/petrostrak/command-line-apps-in-Go/pScan/scan"
 	"github.com/spf13/cobra"
 )
 
@@ -53,4 +55,16 @@ func init() {
 	// is called directly, e.g.:
 	// scanCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	scanCmd.Flags().IntSliceP("ports", "p", []int{22, 80, 443}, "ports to scan")
+}
+
+func scanAction(out io.Writer, hostsFile string, ports []int) error {
+	hl := &scan.HostsList{}
+
+	if err := hl.Load(hostsFile); err != nil {
+		return err
+	}
+
+	results := scan.Run(hl, ports)
+
+	return printResults(out, results)
 }
