@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"sync"
 
 	todo "github.com/petrostrak/command-line-apps-in-Go/Todo"
@@ -155,4 +156,21 @@ func addHandler(w http.ResponseWriter, r *http.Request, list *todo.List, todoFil
 	}
 
 	replyTextContent(w, r, http.StatusCreated, "")
+}
+
+func validateID(path string, list *todo.List) (int, error) {
+	id, err := strconv.Atoi(path)
+	if err != nil {
+		return 0, fmt.Errorf("%w: Invalid ID: %s", ErrInvalidData, err)
+	}
+
+	if id < 1 {
+		return 0, fmt.Errorf("%w, Invalid ID: Less than one", ErrInvalidData)
+	}
+
+	if id > len(*list) {
+		return id, fmt.Errorf("%w: ID %d not found", ErrNotFound, id)
+	}
+
+	return id, nil
 }
