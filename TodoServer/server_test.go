@@ -10,6 +10,8 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	todo "github.com/petrostrak/command-line-apps-in-Go/Todo"
 )
 
 func setupAPI(t *testing.T) (string, func()) {
@@ -63,6 +65,16 @@ func TestGet(t *testing.T) {
 			expCode:    http.StatusOK,
 			expContent: "There's an API here",
 		},
+		{name: "GetAll", path: "/todo",
+			expCode:    http.StatusOK,
+			expItems:   2,
+			expContent: "Task number 1.",
+		},
+		{name: "GetOne", path: "/todo/1",
+			expCode:    http.StatusOK,
+			expItems:   1,
+			expContent: "Task number 1.",
+		},
 		{name: "NotFound", path: "/todo/500",
 			expCode: http.StatusNotFound,
 		},
@@ -74,6 +86,11 @@ func TestGet(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			var (
+				resp struct {
+					Results      todo.List `json:"results"`
+					Date         int64     `json:="date"`
+					TotalResults int       `json:="total_results"`
+				}
 				body []byte
 				err  error
 			)
@@ -89,6 +106,19 @@ func TestGet(t *testing.T) {
 			}
 
 			switch {
+			case r.Header.Get("Content-Type") == "application/json":
+				if err = json.NewDecoder(r.Body).Decode(&resp); err != nil {
+					t.Error(err)
+				}
+
+				if resp.TotalResults != tc.expItems {
+					t.Errorf("Expected %d items, got %d.", tc.expItems, resp.TotalResults)
+				}
+
+				if resp.Results[0].Task != tc.expContent {
+					t.Errorf("Expected %q, got %q.", tc.expContent,
+						resp.Results[0].Task)
+				}
 			case strings.Contains(r.Header.Get("Content-Type"), "text/plain"):
 				if body, err = ioutil.ReadAll(r.Body); err != nil {
 					t.Error(err)
