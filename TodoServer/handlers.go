@@ -80,3 +80,11 @@ func todoRouter(todoFile string, l sync.Locker) http.HandlerFunc {
 		}
 	}
 }
+
+func getAllHandler(w http.ResponseWriter, r *http.Request, list *todo.List) {
+	resp := &todoResponse{
+		Results: *list,
+	}
+
+	replyJSONContent(w, r, http.StatusOK, resp)
+}
