@@ -107,3 +107,25 @@ func deleteHandler(w http.ResponseWriter, r *http.Request, list *todo.List, id i
 
 	replyTextContent(w, r, http.StatusNoContent, "")
 }
+
+// This function uses the method r.URL.Query to look for query parameters.
+// If it finds the query parameter complete , it completes the item
+// represented by id .
+func patchHandler(w http.ResponseWriter, r *http.Request, list *todo.List, id int, todoFile string) {
+	q := r.URL.Query()
+
+	if _, ok := q["complete"]; !ok {
+		message := "Missing query param 'complete'"
+		replyError(w, r, http.StatusBadRequest, message)
+		return
+	}
+
+	list.Complete(id)
+
+	if err := list.Save(todoFile); err != nil {
+		replyError(w, r, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	replyTextContent(w, r, http.StatusNoContent, "")
+}
