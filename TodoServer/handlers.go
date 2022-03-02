@@ -43,5 +43,40 @@ func todoRouter(todoFile string, l sync.Locker) http.HandlerFunc {
 			replyError(w, r, http.StatusInternalServerError, err.Error())
 			return
 		}
+
+		if r.URL.Path == "" {
+			switch r.Method {
+			case http.MethodGet:
+				getAllHandler(w, r, list)
+			case http.MethodPost:
+				addHandler(w, r, list, todoFile)
+			default:
+				message := "Method not supported"
+				replyError(w, r, http.StatusMethodNotAllowed, message)
+			}
+			return
+		}
+
+		id, err := validateID(r.URL.Path, list)
+		if err != nil {
+			if errors.Is(err, ErrNotFound) {
+				replyError(w, r, http.StatusNotFound, err.Error())
+				return
+			}
+			replyError(w, r, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		switch r.Method {
+		case http.MethodGet:
+			getOneHandler(w, r, list, id)
+		case http.MethodDelete:
+			deleteHandler(w, r, list, id, todoFile)
+		case http.MethodPatch:
+			patchHandler(w, r, list, id, todoFile)
+		default:
+			message := "Method not supported"
+			replyError(w, r, http.StatusMethodNotAllowed, message)
+		}
 	}
 }
