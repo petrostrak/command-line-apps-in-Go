@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"sync"
 
@@ -128,4 +130,29 @@ func patchHandler(w http.ResponseWriter, r *http.Request, list *todo.List, id in
 	}
 
 	replyTextContent(w, r, http.StatusNoContent, "")
+}
+
+func addHandler(w http.ResponseWriter, r *http.Request, list *todo.List, todoFile string) {
+	i := struct {
+		Task string `json:"task"`
+	}{}
+
+	item := todo.Item{
+		Task: i.Task,
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&item); err != nil {
+		message := fmt.Sprintf("Invalid JSON: %s", err)
+		replyError(w, r, http.StatusBadRequest, message)
+		return
+	}
+
+	list.Add(item)
+
+	if err := list.Save(todoFile); err != nil {
+		replyError(w, r, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	replyTextContent(w, r, http.StatusCreated, "")
 }
