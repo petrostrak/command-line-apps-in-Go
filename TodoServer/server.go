@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 )
 
@@ -21,4 +22,9 @@ func replyJSONContent(w http.ResponseWriter, r *http.Request, status int, resp *
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	w.Write(body)
+}
+
+func replyError(w http.ResponseWriter, r *http.Request, status int, msg string) {
+	log.Printf("%s %s: Error: %d %s", r.URL, r.Method, status, msg)
+	http.Error(w, http.StatusText(status), status)
 }
