@@ -96,3 +96,14 @@ func getOneHandler(w http.ResponseWriter, r *http.Request, list *todo.List, id i
 
 	replyJSONContent(w, r, http.StatusOK, resp)
 }
+
+func deleteHandler(w http.ResponseWriter, r *http.Request, list *todo.List, id int, todoFile string) {
+	list.Delete(id)
+
+	if err := list.Save(todoFile); err != nil {
+		replyError(w, r, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	replyTextContent(w, r, http.StatusNoContent, "")
+}
