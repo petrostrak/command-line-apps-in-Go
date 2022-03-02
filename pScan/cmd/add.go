@@ -22,6 +22,7 @@ import (
 
 	"github.com/petrostrak/command-line-apps-in-Go/pScan/scan"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // addCmd represents the add command
@@ -29,10 +30,7 @@ var addCmd = &cobra.Command{
 	Use:   "add <host1>...<hostn>",
 	Short: "Add new host(s) to list",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		hostsFile, err := cmd.Flags().GetString("hosts-file")
-		if err != nil {
-			return err
-		}
+		hostsFile := viper.GetString("hosts-file")
 
 		return addAction(os.Stdout, hostsFile, args)
 	},
