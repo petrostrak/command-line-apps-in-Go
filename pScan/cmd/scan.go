@@ -16,6 +16,7 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
 	"io"
 	"os"
 
@@ -67,4 +68,28 @@ func scanAction(out io.Writer, hostsFile string, ports []int) error {
 	results := scan.Run(hl, ports)
 
 	return printResults(out, results)
+}
+
+func printResults(out io.Writer, results []scan.Results) error {
+	msg := ""
+
+	for _, r := range results {
+		msg += fmt.Sprintf("%s:", r.Host)
+
+		if r.NotFound {
+			msg += fmt.Sprintf(" Host not found\n\n")
+			continue
+		}
+
+		msg += fmt.Sprintln()
+
+		for _, p := range r.PortStates {
+			msg += fmt.Sprintf("\t%d: %s\n", p.Port, p.Open)
+		}
+
+		msg += fmt.Sprintln()
+	}
+
+	_, err := fmt.Fprint(out, msg)
+	return err
 }
