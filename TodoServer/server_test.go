@@ -134,3 +134,58 @@ func TestGet(t *testing.T) {
 		})
 	}
 }
+
+func TestAdd(t *testing.T) {
+	url, cleanup := setupAPI(t)
+	defer cleanup()
+
+	taskName := "Task number 3."
+
+	t.Run("Add", func(t *testing.T) {
+		var body bytes.Buffer
+
+		item := struct {
+			Task string `json:"task"`
+		}{
+			Task: taskName,
+		}
+
+		if err := json.NewEncoder(&body).Encode(item); err != nil {
+			t.Fatal(err)
+		}
+
+		r, err := http.Post(url+"/todo", "application/json", &body)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if r.StatusCode != http.StatusCreated {
+			t.Errorf("Expected %q, got %q.",
+				http.StatusText(http.StatusCreated), http.StatusText(r.StatusCode))
+		}
+	})
+
+	t.Run("CheckAdd", func(t *testing.T) {
+		r, err := http.Get(url + "/todo/3")
+		if err != nil {
+			t.Error(err)
+		}
+
+		if r.StatusCode != http.StatusOK {
+			t.Fatalf("Expected %q, got %q.",
+				http.StatusText(http.StatusOK), http.StatusText(r.StatusCode))
+		}
+
+		var resp todoResponse
+
+		if err := json.NewDecoder(r.Body).Decode(&resp); err != nil {
+			t.Fatal(err)
+		}
+
+		r.Body.Close()
+
+		if resp.Results[0].Task != taskName {
+			t.Errorf("Expected %q, got %q.", taskName, resp.Results[0].Task)
+		}
+	})
+}
