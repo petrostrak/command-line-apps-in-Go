@@ -16,6 +16,7 @@ limitations under the License.
 package cmd
 
 import (
+	"io"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -49,4 +50,8 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// completionCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+}
+
+func competionAction(out io.Writer) error {
+	return rootCmd.GenBashCompletion(out)
 }
