@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"errors"
+	"net/http"
 	"time"
 )
 
@@ -24,4 +25,10 @@ type response struct {
 	Results      []item `json:"results"`
 	Date         int    `json:"date"`
 	TotalResults int    `json:"total_results"`
+}
+
+func newClient() *http.Client {
+	return &http.Client{
+		Timeout: 10 * time.Second,
+	}
 }
