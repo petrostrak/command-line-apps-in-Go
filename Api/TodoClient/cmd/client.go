@@ -17,6 +17,10 @@ var (
 	ErrNotNumber       = errors.New("not a number")
 )
 
+const (
+	timeFormat = "Jan/02 @15:04"
+)
+
 type item struct {
 	Task        string
 	Done        bool
