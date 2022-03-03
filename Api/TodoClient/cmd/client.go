@@ -73,3 +73,18 @@ func getAll(apiRoot string) ([]item, error) {
 	u := fmt.Sprintf("%s/todo", apiRoot)
 	return getItems(u)
 }
+
+func getOne(apiRoot string, id int) (item, error) {
+	u := fmt.Sprintf("%s/todo/%d", apiRoot, id)
+
+	items, err := getItems(u)
+	if err != nil {
+		return item{}, err
+	}
+
+	if len(items) != 1 {
+		return item{}, fmt.Errorf("%w: Invalid results", ErrInvalid)
+	}
+
+	return items[0], nil
+}
