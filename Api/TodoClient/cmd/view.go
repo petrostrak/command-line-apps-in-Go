@@ -16,7 +16,10 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
+	"io"
 	"os"
+	"strconv"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -46,4 +49,18 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// viewCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+}
+
+func viewAction(out io.Writer, apiRoot, arg string) error {
+	id, err := strconv.Atoi(arg)
+	if err != nil {
+		return fmt.Errorf("%w: Item id must be a number", ErrNotNumber)
+	}
+
+	i, err := getOne(apiRoot, id)
+	if err != nil {
+		return err
+	}
+
+	return printOne(out, i)
 }
