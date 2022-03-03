@@ -68,3 +68,8 @@ func getItems(url string) ([]item, error) {
 
 	return resp.Results, nil
 }
+
+func getAll(apiRoot string) ([]item, error) {
+	u := fmt.Sprintf("%s/todo", apiRoot)
+	return getItems(u)
+}
