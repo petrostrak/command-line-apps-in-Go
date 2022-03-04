@@ -16,6 +16,7 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -59,4 +60,9 @@ func addAction(out io.Writer, apiRoot string, args []string) error {
 	}
 
 	return printAdd(out, task)
+}
+
+func printAdd(out io.Writer, task string) error {
+	_, err := fmt.Fprintf(out, "Added task %q to the list.\n", task)
+	return err
 }
