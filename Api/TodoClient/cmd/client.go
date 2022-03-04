@@ -152,3 +152,9 @@ func completeItem(apiRoot string, id int) error {
 
 	return sendRequest(u, http.MethodPatch, "", http.StatusNoContent, nil)
 }
+
+func deleteItem(apiRoot string, id int) error {
+	u := fmt.Sprintf("%s/todo/%d", apiRoot, id)
+
+	return sendRequest(u, http.MethodDelete, "", http.StatusNoContent, nil)
+}
