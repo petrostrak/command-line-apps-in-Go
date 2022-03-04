@@ -16,7 +16,9 @@ limitations under the License.
 package cmd
 
 import (
+	"io"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -47,4 +49,14 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// addCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+}
+
+func addAction(out io.Writer, apiRoot string, args []string) error {
+	task := strings.Join(args, " ")
+
+	if err := addItem(apiRoot, task); err != nil {
+		return err
+	}
+
+	return printAdd(out, task)
 }
